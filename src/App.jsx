@@ -15,7 +15,7 @@ function App() {
     hasFetched = true;
 
     try {
-      const response = await axios.get('http://localhost:3001/profile', { withCredentials: true });
+      const response = await axios.get('https://login-system-lgg3.onrender.com/profile', { withCredentials: true });
 
       if (response.data && response.data.email) {
         setUser(response.data);
