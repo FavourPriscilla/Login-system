@@ -1,57 +1,63 @@
-import React, { createContext, useContext, useState } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
 
+    // Load logged-in user session from localStorage on page refresh
+    useEffect(() => {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            setUser(JSON.parse(savedUser));
+        }
+    }, []);
+
+    // 1. Register User
     async function register(name, email, password, confirmPassword) {
-        try {
-            const response = await axios.post('https://login-system-lgg3.onrender.com/register', { name, email, password, confirmPassword }, { withCredentials: true });
-
-            if (response.data.success) {
-                setUser(response.data.user); 
-            } else {
-                alert(response.data.message || "An error occurred");
-            }
-        } catch (error) {
-            if (error.response && error.response.data) {
-                alert(error.response.data.message || "An error occurred");
-            } else {
-                alert("An error occurred");
-            }
-            console.error("Registration error:", error);
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
         }
+
+        const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        
+        // Check if user already exists
+        const userExists = existingUsers.find(u => u.email === email);
+        if (userExists) {
+            alert("User with this email already exists!");
+            return;
+        }
+
+        const newUser = { name, email, password };
+        existingUsers.push(newUser);
+
+        // Save updated user list and log in new user
+        localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        setUser(newUser);
+        alert("Account registered successfully!");
     }
 
+    // 2. Login User
     async function login(email, password) {
-        try {
-            const response = await axios.post('https://login-system-lgg3.onrender.com/login', { email, password }, { withCredentials: true });
+        const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        
+        const foundUser = existingUsers.find(u => u.email === email && u.password === password);
 
-            if (response.data.success) {
-                setUser(response.data.user); 
-            } else {
-                alert(response.data.message || "An error occurred");
-            }
-        } catch (error) {
-            if (error.response && error.response.data) {
-                alert(error.response.data.message || "An error occurred");
-            } else {
-                alert("An error occurred");
-            }
-            console.error("Login error:", error);
+        if (foundUser) {
+            localStorage.setItem('currentUser', JSON.stringify(foundUser));
+            setUser(foundUser);
+        } else {
+            alert("Invalid email or password!");
         }
     }
 
-
+    // 3. Logout User
     async function logout() {
+        localStorage.removeItem('currentUser');
         setUser(null);
-        const response = await axios.post('https://login-system-lgg3.onrender.com/logout', {}, { withCredentials: true });
-
-        if (response.data.success) {
-            alert('User logged out');
-        }
+        alert("Logged out successfully");
     }
 
     return (
