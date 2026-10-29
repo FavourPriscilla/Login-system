@@ -32,7 +32,17 @@ function App() {
     fetchProfile();
   }, [setUser]);
 
-  return user ? <Protected /> : <Login />;
+  return (
+    <>
+      {user ? <Protected /> : <Login />}
+      
+      <footer>
+        <p style={{ textAlign: "center", marginTop: "2rem", padding: "1rem", color: "#666" }}>
+          Developed by Mulungi Favour Priscilla | M25D14/024, Musana Jimmy Tibiita | M25D14/005, Ssekisambu Reagan | M25D14/009
+        </p>
+      </footer>
+    </>
+  );
 }
 
 export default App;
