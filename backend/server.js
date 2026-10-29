@@ -16,7 +16,7 @@ const sanitizeHtml = require('sanitize-html');
 
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: ['https://login-system-roan-pi.vercel.app', 'http://localhost:5173'],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -161,3 +161,13 @@ app.post('/logout', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 });
+
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,      // required for cross-site cookies over HTTPS
+    sameSite: 'none'   // required for cross-site cookie sharing
+  }
+}));
